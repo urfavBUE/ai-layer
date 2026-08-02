@@ -7,29 +7,39 @@ const anthropic = new Anthropic({
 
 async function askClaude(request) {
 
-    const prompt = await buildPrompt(request);
+    try {
 
-    const response = await anthropic.messages.create({
+        const prompt = await buildPrompt(request);
 
-        model: "claude-3-5-sonnet-latest",
+        const response = await anthropic.messages.create({
 
-        max_tokens: 1000,
+            model: "claude-3-5-sonnet-latest",
 
-        messages: [
-            {
-                role: "user",
-                content: prompt
-            }
-        ]
+            max_tokens: 1000,
 
-    });
+            messages: [
+                {
+                    role: "user",
+                    content: prompt
+                }
+            ]
 
-    const answer = response.content
-        .filter(item => item.type === "text")
-        .map(item => item.text)
-        .join("\n");
+        });
 
-    return answer;
+        return response.content
+            .filter(x => x.type === "text")
+            .map(x => x.text)
+            .join("\n");
+
+    } catch (err) {
+
+        console.log("FULL ERROR:");
+        console.log(err);
+
+        throw err;
+
+    }
+
 }
 
 module.exports = {
