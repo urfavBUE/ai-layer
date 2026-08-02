@@ -2,7 +2,7 @@ const Anthropic = require('@anthropic-ai/sdk');
 const { buildPrompt } = require('./promptBuilder');
 
 const anthropic = new Anthropic({
-    apiKey: process.env.CLAUDE_API_KEY
+    apiKey: process.env.ANTHROPIC_API_KEY
 });
 
 async function askClaude(request) {
@@ -11,7 +11,7 @@ async function askClaude(request) {
 
     const response = await anthropic.messages.create({
 
-        model: "claude-sonnet-5",
+        model: "claude-sonnet-4-20250514",
 
         max_tokens: 1000,
 
