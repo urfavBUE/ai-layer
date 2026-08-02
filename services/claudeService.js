@@ -6,40 +6,34 @@ const anthropic = new Anthropic({
 });
 
 async function askClaude(request) {
-
     try {
-
         const prompt = await buildPrompt(request);
 
         const response = await anthropic.messages.create({
-
-            model: "claude-3-5-sonnet-latest",
-
-            max_tokens: 1000,
-
+            model: "claude-sonnet-5",
+            max_tokens: 2000,
             messages: [
                 {
                     role: "user",
                     content: prompt
                 }
             ]
-
         });
 
         return response.content
-            .filter(x => x.type === "text")
-            .map(x => x.text)
+            .filter(item => item.type === "text")
+            .map(item => item.text)
             .join("\n");
 
-    } catch (err) {
+    } catch (error) {
+        console.error("Claude API Error:", error);
 
-        console.log("FULL ERROR:");
-        console.log(err);
-
-        throw err;
-
+        throw new Error(
+            error?.error?.error?.message ||
+            error?.message ||
+            "Claude API request failed"
+        );
     }
-
 }
 
 module.exports = {
