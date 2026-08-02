@@ -1,22 +1,27 @@
 const erpRepository = require('../repositories/erpRepository');
 
 async function buildContext(request) {
+    const repositoryContext = await erpRepository.getERPContext(request.session);
 
-    const erpContext = await erpRepository.getERPContext(request.session);
+    const liveContext = request.context || {};
 
     return {
+        organization: repositoryContext.organization,
+        branch: repositoryContext.branch,
+        module: repositoryContext.module,
+        screen: repositoryContext.screen,
+        language: repositoryContext.language,
+        user: repositoryContext.user,
 
-        organization: erpContext.organization,
-        branch: erpContext.branch,
-        module: erpContext.module,
-        screen: erpContext.screen,
-        language: erpContext.language,
-        user: erpContext.user,
+        // بيانات الموقع الحقيقية
+        ...liveContext,
 
-        summary: erpContext.summary
-
+        // الاحتفاظ بالملخص القديم لو موجود
+        summary: {
+            ...(repositoryContext.summary || {}),
+            ...(liveContext.summary || {})
+        }
     };
-
 }
 
 module.exports = {
