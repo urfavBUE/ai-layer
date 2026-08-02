@@ -8,61 +8,66 @@ const RequestModel = require('./models/requestModel');
 
 const app = express();
 
-// مهم مع Railway
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
 
-// الصفحة الرئيسية
 app.get('/', (req, res) => {
-    res.send('AI Layer is working');
+    res.json({
+        success: true,
+        message: 'ERP Intelligence AI Layer is working'
+    });
 });
 
-// اختبار سريع
 app.get('/chat', (req, res) => {
-    res.send('Chat endpoint is working');
+    res.json({
+        success: true,
+        message: 'Chat endpoint is working'
+    });
 });
 
-// الـ AI Endpoint
 app.post('/ask', async (req, res) => {
-
     try {
-
         const request = new RequestModel(req.body);
 
-        if (!request.question) {
+        if (!request.question || !request.question.trim()) {
             return res.status(400).json({
                 success: false,
-                error: "Question is required"
+                error: 'Question is required'
             });
         }
 
-        console.log("==================================");
-        console.log("Request Received");
-        console.log(request);
-        console.log("==================================");
+        console.log('==================================');
+        console.log('ERP Intelligence Request Received');
+        console.log({
+            question: request.question,
+            session: request.session
+        });
+        console.log('==================================');
 
-        const answer = await askClaude(request);
+        const result = await askClaude(request);
 
-        res.json({
+        return res.json({
             success: true,
-            answer: answer
+            answer: result.answer,
+            evidence: result.evidence || [],
+            risks: result.risks || [],
+            recommendations: result.recommendations || [],
+            followUpSuggestions: result.followUpSuggestions || [],
+            navigationTargets: result.navigationTargets || []
         });
 
     } catch (err) {
+        console.error('AI Layer Error:', err);
 
-        console.error(err);
-
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
-            error: err.message
+            error: err.message || 'AI request failed'
         });
-
     }
-
 });
 
 app.listen(PORT, () => {
-    console.log(`AI Layer is running on port ${PORT}`);
+    console.log(`ERP Intelligence AI Layer is running on port ${PORT}`);
 });
