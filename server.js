@@ -5,7 +5,6 @@ const cors = require('cors');
 
 const { askClaude } = require('./services/claudeService');
 const RequestModel = require('./models/requestModel');
-const { registerTTSRoute } = require('./ttsRoute');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,19 +12,15 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 
-// Register multilingual Text-to-Speech endpoint:
-// POST /tts
-registerTTSRoute(app);
-
 app.get('/', (req, res) => {
-  res.json({
+  return res.json({
     success: true,
     message: 'ERP Intelligence AI Layer is working',
   });
 });
 
 app.get('/chat', (req, res) => {
-  res.json({
+  return res.json({
     success: true,
     message: 'Chat endpoint is working',
   });
@@ -46,7 +41,9 @@ app.post('/ask', async (req, res) => {
     console.log('ERP Intelligence Request Received');
     console.log({
       question: request.question,
-      session: request.session,
+      user: request.user,
+      conversationHistoryCount:
+        request.conversationHistory?.length || 0,
     });
     console.log('==================================');
 
@@ -58,15 +55,21 @@ app.post('/ask', async (req, res) => {
       evidence: result.evidence || [],
       risks: result.risks || [],
       recommendations: result.recommendations || [],
-      followUpSuggestions: result.followUpSuggestions || [],
-      navigationTargets: result.navigationTargets || [],
+      followUpSuggestions:
+        result.followUpSuggestions || [],
+      navigationTargets:
+        result.navigationTargets || [],
+      conversationContext:
+        result.conversationContext || {},
     });
-  } catch (err) {
-    console.error('AI Layer Error:', err);
+  } catch (error) {
+    console.error('AI Layer Error:', error);
 
     return res.status(500).json({
       success: false,
-      error: err.message || 'AI request failed',
+      error:
+        error?.message ||
+        'AI request failed',
     });
   }
 });
